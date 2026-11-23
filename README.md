@@ -1,444 +1,232 @@
-\# AI-Based Brand Intelligence and Consumer Perception Analytics
 
+# AI-Based Brand Intelligence and Consumer Perception Analytics Using Big Data
 
+## 1. Project Overview
 
-\## 1. Project Overview
+This project analyses customer reviews from 20 fashion and shopping applications to understand customer satisfaction, consumer perception and app experience.
 
+It combines Apache PySpark for big data processing, VADER for sentiment analysis, keyword-based aspect classification, and Streamlit with Plotly for interactive visualisation.
 
+The project provides brand-wise and platform-wise insights into customer feedback to support data-driven business decisions.
 
-This project analyses customer reviews of fast-fashion mobile applications to understand consumer perception, customer satisfaction and application experience.
+## 2. Problem Statement
 
+Fashion shopping applications receive large volumes of customer feedback. Manually analysing these reviews makes it difficult to identify customer satisfaction patterns and recurring issues.
 
+This project automates review processing, sentiment classification and customer experience analysis to identify areas that may require improvement.
 
-It uses Big Data processing with Apache PySpark, Natural Language Processing (NLP) with VADER Sentiment Analysis, and an interactive Streamlit dashboard to convert unstructured customer reviews into useful business insights.
+## 3. Objectives
 
+- Collect customer reviews from fashion and shopping applications.
+- Analyse customer sentiment and ratings.
+- Process review data using Apache PySpark.
+- Identify common customer experience aspects.
+- Compare customer feedback across 20 applications.
+- Develop an interactive business intelligence dashboard.
+- Generate insights to support customer experience improvement.
 
+## 4. Dataset Description
 
-The analysis focuses on identifying customer sentiment, understanding frequently discussed experience areas and highlighting potential areas for improvement.
+The project uses publicly available Google Play application reviews collected using the Google Play Scraper Python library.
 
+The dataset contains 5,734 processed reviews collected across 20 shopping applications.
 
-
-\## 2. Problem Statement
-
-
-
-Fast-fashion mobile applications receive large volumes of customer feedback. Manually analysing thousands of reviews is time-consuming and makes it difficult to identify recurring customer concerns and satisfaction patterns.
-
-
-
-This project addresses the problem by automating review processing, sentiment classification and customer experience analysis to support data-driven business decisions.
-
-
-
-\## 3. Objectives
-
-
-
-\- Analyse customer reviews from fast-fashion mobile applications.
-
-\- Clean and preprocess unstructured review data.
-
-\- Apply Apache Spark for data processing.
-
-\- Perform sentiment analysis using VADER NLP.
-
-\- Classify reviews into customer experience aspects.
-
-\- Analyse customer ratings and sentiment distribution.
-
-\- Develop an interactive dashboard for visualising results.
-
-\- Generate insights that can help businesses improve customer experience.
-
-
-
-\## 4. Dataset Description
-
-
-
-The project uses the Mendeley dataset titled "Dataset Improving Fast-Fashion Mobile Application".
-
-
-
-The dataset contains customer reviews associated with fast-fashion applications, including Zara, H\&M and Uniqlo.
-
-
-
-\### Dataset attributes
-
-
+### Dataset attributes
 
 | Column | Description |
-
 |---|---|
-
+| Brand | Shopping app or brand name |
+| App_ID | Google Play application identifier |
+| App_Category | Application category |
+| Review_ID | Unique review identifier |
 | Review | Customer-written review |
-
-| Rating | Customer rating |
-
-| Sentiment | Original sentiment label |
-
-
-
-The supplied dataset does not contain a separate brand identifier for each review. Therefore, this project analyses overall fast-fashion application experiences rather than making individual brand comparisons.
-
-
-
-\## 5. Technologies Used
-
-
-
-\- Python 3.12
-
-\- Apache PySpark 4.3.0
-
-\- Pandas
-
-\- VADER Sentiment Analysis
-
-\- Streamlit
-
-\- Plotly
-
-\- NumPy
-
-\- Java 21
-
-
-
-\## 6. Methodology
-
-
-
-\### Step 1: Data Collection
-
-
-
-The original Excel dataset is loaded into the Python environment.
-
-
-
-\### Step 2: Data Preprocessing
-
-
-
-\- Remove reviews with missing values.
-
-\- Remove duplicate records.
-
-\- Convert ratings into numeric values.
-
-\- Standardise sentiment labels.
-
-\- Remove empty reviews.
-
-\- Retain valid ratings between 1 and 5.
-
-
-
-\### Step 3: Big Data Processing
-
-
-
-Apache PySpark is used to create a Spark DataFrame and perform distributed-style data processing using local Spark execution.
-
-
-
-\### Step 4: Sentiment Analysis
-
-
-
-VADER (Valence Aware Dictionary and sEntiment Reasoner) is used to calculate compound sentiment scores.
-
-
-
-Reviews are classified into:
-
-
-
-\- Positive
-
-\- Negative
-
-\- Neutral
-
-
-
-The dataset-provided sentiment labels are also retained for comparison.
-
-
-
-\### Step 5: Customer Experience Aspect Classification
-
-
-
-Keyword-based classification identifies the following aspects:
-
-
-
-\- Login and Account
-
-\- Payment
-
-\- Delivery
-
-\- Customer Support
-
-\- App Usability
-
-\- Product Display
-
-\- General Experience
-
-
-
-\### Step 6: Feature Engineering
-
-
-
-Additional analytical attributes are generated:
-
-
-
-\- Sentiment score
-
-\- Predicted sentiment
-
-\- Review length
-
-\- Rating category
-
-
-
-\### Step 7: Data Export
-
-
-
-The processed Spark DataFrame is converted into a Pandas DataFrame and exported as a CSV file for dashboard visualisation.
-
-
-
-\### Step 8: Dashboard Development
-
-
-
-Streamlit and Plotly are used to build an interactive dashboard containing:
-
-
-
-\- Business overview and key metrics
-
-\- Sentiment distribution
-
-\- Customer rating distribution
-
-\- Customer experience aspect analysis
-
-\- Sentiment score distribution
-
-\- Customer review explorer
-
-\- Business insights
-
-
-
-\## 7. Project Results
-
-
-
-The final processing pipeline produced the following results:
-
-
+| Rating | App review rating |
+| Review_Date | Date of review |
+| Thumbs_Up | Review helpfulness count |
+| Sentiment_Score | VADER compound score |
+| Predicted_Sentiment | Positive, negative or neutral |
+| Aspect | Customer experience category |
+| Rating_Category | High, medium or low |
+
+## 5. Applications Analysed
+
+The project includes 20 shopping applications:
+
+1. Zara
+2. H&M
+3. adidas
+4. Myntra
+5. Nykaa Fashion
+6. Flipkart
+7. Meesho
+8. Tata CLiQ
+9. Max Fashion
+10. Lifestyle
+11. Shoppers Stop
+12. The Souled Store
+13. SNITCH
+14. Savana
+15. Littlebox
+16. NEWME
+17. Westside
+18. M&S India
+19. Fabindia
+20. Rare Rabbit
+
+Applications are grouped into fashion retailers, marketplaces, department stores and sportswear.
+
+## 6. Technologies Used
+
+- Python 3.12
+- Apache PySpark
+- Pandas
+- VADER Sentiment Analysis
+- Google Play Scraper
+- Streamlit
+- Plotly
+- Java 21
+
+## 7. Methodology
+
+### Step 1: Data Collection
+Customer reviews are collected from Google Play applications using the Google Play Scraper library.
+
+### Step 2: Data Cleaning
+- Remove missing reviews and ratings.
+- Remove duplicate review records.
+- Convert ratings into numeric values.
+- Retain valid review information.
+
+### Step 3: Big Data Processing
+Apache PySpark is used to process review records through a local Spark session.
+
+### Step 4: Sentiment Analysis
+VADER calculates compound sentiment scores and classifies reviews into positive, negative and neutral categories.
+
+### Step 5: Aspect Classification
+Keyword-based classification identifies:
+- General Experience
+- App Usability
+- Delivery
+- Payment
+- Customer Support
+- Product Display
+- Login and Account
+
+### Step 6: Feature Engineering
+Additional features include sentiment score, review length and rating category.
+
+### Step 7: Dashboard Development
+Streamlit and Plotly provide interactive visualisations, including:
+- Brand-wise average ratings
+- Sentiment distribution
+- Customer experience aspect comparison
+- Brand performance summary
+- Customer review explorer
+
+## 8. Project Results
+
+The processing pipeline produced:
 
 | Metric | Result |
-
 |---|---:|
+| Applications analysed | 20 |
+| Processed reviews | 5,734 |
+| Positive reviews | 3,384 |
+| Negative reviews | 1,432 |
+| Neutral reviews | 918 |
 
-| Original records | 61,150 |
-
-| Processed records | 43,330 |
-
-| Average rating | 3.28 / 5 |
-
-| Predicted positive reviews | 22,471 |
-
-| Predicted negative reviews | 10,462 |
-
-| Predicted neutral reviews | 10,397 |
-
-
-
-\### Customer Experience Analysis
-
-
+### Customer Experience Aspects
 
 | Aspect | Reviews |
-
 |---|---:|
+| General Experience | 3,112 |
+| App Usability | 1,505 |
+| Delivery | 471 |
+| Payment | 349 |
+| Customer Support | 202 |
+| Product Display | 63 |
+| Login and Account | 32 |
 
-| General Experience | 26,623 |
-
-| Delivery | 4,423 |
-
-| App Usability | 3,652 |
-
-| Payment | 2,781 |
-
-| Product Display | 2,681 |
-
-| Login and Account | 1,990 |
-
-| Customer Support | 1,180 |
-
-
-
-These results indicate that general application experience is the most frequently discussed category in the analysed reviews.
-
-
-
-\## 8. Project Structure
-
-
+## 9. Project Structure
 
 ```text
-
-Brand\_Intelligence\_BDA/
-
+Brand_Intelligence_BDA/
 │
-
 ├── app.py
-
-├── process\_data.py
-
+├── collect_reviews.py
+├── final_app_check.py
+├── process_brand_data.py
+├── process_data.py
 ├── requirements.txt
-
 ├── README.md
-
 │
-
 └── data/
-
-&#x20;   ├── Dataset Improving Fast-Fashion Mobile Application.zip
-
-&#x20;   ├── cleaned\_input.csv
-
-&#x20;   ├── processed\_reviews.csv
-
-&#x20;   │
-
-&#x20;   └── extracted/
-
-&#x20;       └── Dataset Improving Fast-Fashion Mobile Application/
-
-&#x20;           └── sentiment\_analysis.xlsx
-
+    ├── brand_reviews_raw.csv
+    ├── processed_brand_reviews.csv
+    ├── final_app_check_results.csv
+    └── processed_reviews.csv
 ```
 
+## 10. Installation and Execution
 
-
-\## 9. Installation and Execution
-
-
-
-\### Install dependencies
-
-
+Install dependencies:
 
 ```bash
-
-py -m pip install pandas numpy pyspark vaderSentiment streamlit plotly openpyxl
-
+py -m pip install -r requirements.txt
 ```
 
+Collect reviews:
 
-
-\### Configure Java and Python for PySpark (Windows PowerShell)
-
-
-
-```powershell
-
-$env:JAVA\_HOME="C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.13.10002-hotspot"
-
-$env:Path="$env:JAVA\_HOME\\bin;$env:Path"
-
-$env:PYSPARK\_PYTHON="C:\\Users\\Gagana T R\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"
-
-$env:PYSPARK\_DRIVER\_PYTHON=$env:PYSPARK\_PYTHON
-
+```bash
+py collect_reviews.py
 ```
 
+Process brand reviews:
 
-
-\### Run data processing
-
-
-
-```powershell
-
-py process\_data.py
-
+```bash
+py process_brand_data.py
 ```
 
+Launch dashboard:
 
-
-\### Launch dashboard
-
-
-
-```powershell
-
+```bash
 py -m streamlit run app.py
-
 ```
 
+## 11. Limitations
 
+- Review counts differ across applications.
+- Google Play reviews may not represent all customers.
+- VADER may not correctly interpret sarcasm or complex language.
+- Aspect classification uses predefined keywords.
+- App-store ratings measure application experience, not clothing quality.
+- Marketplace applications and individual brand-owned applications represent different business models.
+- PySpark runs in local mode rather than on a distributed cluster.
 
-\## 10. Limitations
+## 12. Future Enhancements
 
+- Advanced machine-learning-based aspect classification.
+- Transformer-based sentiment analysis.
+- Review trend analysis over time.
+- More comprehensive data collection.
+- Distributed Spark cluster implementation.
 
+## 13. Conclusion
 
-\- The dataset does not provide individual brand identifiers, preventing reliable brand-wise comparison.
+This project demonstrates how Big Data processing and Natural Language Processing can be applied to customer feedback analysis.
 
-\- Aspect classification is based on predefined keywords and may not capture every contextual meaning.
+By analysing reviews from 20 shopping applications, the system identifies customer sentiment, ratings and frequently discussed experience areas.
 
-\- VADER is a lexicon-based sentiment analyser and may not correctly interpret sarcasm or complex language.
+The interactive dashboard provides a business intelligence perspective that can help identify customer concerns and opportunities to improve digital shopping experiences.
+```
 
-\- Spark is configured in local execution mode rather than a multi-node cluster.
+### Step 3 — Save it
 
-\- The dataset represents a particular collection of reviews and may not represent all fast-fashion customers.
+Scroll down and click **Commit changes**.
 
+Commit message:
 
+`Update README with brand intelligence analysis`
 
-\## 11. Future Enhancements
-
-
-
-\- Introduce machine-learning-based aspect classification.
-
-\- Use advanced NLP models for improved sentiment detection.
-
-\- Include brand identifiers for individual brand comparisons.
-
-\- Add time-based sentiment trend analysis if review dates become available.
-
-\- Deploy the dashboard online.
-
-\- Scale processing to a distributed Spark cluster.
-
-
-
-\## 12. Conclusion
-
-
-
-The project demonstrates how Big Data processing and Natural Language Processing can be combined to analyse customer feedback from fast-fashion mobile applications.
-
-
-
-By processing customer reviews, identifying sentiment and classifying experience aspects, the system provides an interactive way to understand consumer perception and identify potential areas for business improvement.
-
-
-
-The project demonstrates the practical application of Apache PySpark, Python-based NLP and interactive data visualisation in business intelligence.
-
+Tell me when done. Next we'll check your `requirements.txt` and Streamlit deployment.
