@@ -3,320 +3,216 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# --------------------------------------------------
-# PAGE CONFIGURATION
-# --------------------------------------------------
-
 st.set_page_config(
     page_title="Brand Intelligence Dashboard",
     page_icon="📊",
     layout="wide"
 )
 
-st.title("📊 AI-Based Brand Intelligence & Consumer Perception Analytics")
-st.markdown(
-    "Analyzing customer reviews, sentiment and app experience "
-    "in the fast-fashion mobile application sector."
-)
-
-st.divider()
-
-# --------------------------------------------------
-# LOAD DATA
-# --------------------------------------------------
-
 @st.cache_data
 def load_data():
-    return pd.read_csv("data/processed_reviews.csv")
+    df = pd.read_csv("data/processed_brand_reviews.csv")
+    df["Rating"] = pd.to_numeric(df["Rating"], errors="coerce")
+    df["Review_Date"] = pd.to_datetime(df["Review_Date"], errors="coerce")
+    return df.dropna(subset=["Review", "Rating"])
 
-try:
-    df = load_data()
-except FileNotFoundError:
-    st.error("Processed dataset not found. Run process_data.py first.")
-    st.stop()
+df = load_data()
 
-# --------------------------------------------------
-# SIDEBAR FILTERS
-# --------------------------------------------------
+st.title("AI-Based Brand Intelligence and Consumer Perception Analytics")
+st.caption("Big Data Analytics | Fashion Shopping App Customer Experience")
 
 st.sidebar.header("Dashboard Filters")
 
-sentiments = ["All"] + sorted(df["Predicted_Sentiment"].dropna().unique().tolist())
-
-selected_sentiment = st.sidebar.selectbox(
-    "Filter by Predicted Sentiment",
-    sentiments
+brands = sorted(df["Brand"].dropna().unique())
+selected_brands = st.sidebar.multiselect(
+    "Select brands",
+    brands,
+    default=brands
 )
 
-aspects = ["All"] + sorted(df["Aspect"].dropna().unique().tolist())
-
-selected_aspect = st.sidebar.selectbox(
-    "Filter by Customer Experience Aspect",
-    aspects
+sentiments = sorted(df["Predicted_Sentiment"].dropna().unique())
+selected_sentiments = st.sidebar.multiselect(
+    "Select sentiment",
+    sentiments,
+    default=sentiments
 )
 
-filtered_df = df.copy()
-
-if selected_sentiment != "All":
-    filtered_df = filtered_df[
-        filtered_df["Predicted_Sentiment"] == selected_sentiment
-    ]
-
-if selected_aspect != "All":
-    filtered_df = filtered_df[
-        filtered_df["Aspect"] == selected_aspect
-    ]
-
-# --------------------------------------------------
-# KEY PERFORMANCE INDICATORS
-# --------------------------------------------------
-
-st.header("Business Overview")
-
-total_reviews = len(filtered_df)
-
-avg_rating = filtered_df["Rating"].mean() if total_reviews else 0
-
-positive_pct = (
-    (filtered_df["Predicted_Sentiment"] == "positive").mean() * 100
-    if total_reviews else 0
+aspects = sorted(df["Aspect"].dropna().unique())
+selected_aspects = st.sidebar.multiselect(
+    "Select customer experience aspect",
+    aspects,
+    default=aspects
 )
 
-negative_pct = (
-    (filtered_df["Predicted_Sentiment"] == "negative").mean() * 100
-    if total_reviews else 0
+filtered = df[
+    df["Brand"].isin(selected_brands)
+    & df["Predicted_Sentiment"].isin(selected_sentiments)
+    & df["Aspect"].isin(selected_aspects)
+]
+
+if filtered.empty:
+    st.warning("No reviews match the selected filters.")
+    st.stop()
+
+# KPIs
+c1, c2, c3, c4 = st.columns(4)
+
+c1.metric("Total Reviews", f"{len(filtered):,}")
+c2.metric("Brands Analysed", filtered["Brand"].nunique())
+c3.metric("Average Rating", f"{filtered['Rating'].mean():.2f}/5")
+c4.metric(
+    "Positive Reviews",
+    f"{(filtered['Predicted_Sentiment'] == 'positive').mean() * 100:.1f}%"
 )
-
-col1, col2, col3, col4 = st.columns(4)
-
-col1.metric("Total Reviews", f"{total_reviews:,}")
-col2.metric("Average Rating", f"{avg_rating:.2f} / 5")
-col3.metric("Positive Reviews", f"{positive_pct:.1f}%")
-col4.metric("Negative Reviews", f"{negative_pct:.1f}%")
 
 st.divider()
 
-# --------------------------------------------------
-# SENTIMENT ANALYSIS
-# --------------------------------------------------
+# Brand rating comparison
+st.subheader("1. Brand-wise Average Rating")
 
-st.header("1. Customer Sentiment Analysis")
-
-col1, col2 = st.columns(2)
-
-sentiment_counts = (
-    filtered_df["Predicted_Sentiment"]
-    .value_counts()
-    .reset_index()
+rating_data = (
+    filtered.groupby("Brand", as_index=False)
+    .agg(Average_Rating=("Rating", "mean"),
+         Review_Count=("Review", "count"))
+    .sort_values("Average_Rating", ascending=False)
 )
-
-sentiment_counts.columns = ["Sentiment", "Count"]
-
-with col1:
-    fig = px.pie(
-        sentiment_counts,
-        names="Sentiment",
-        values="Count",
-        title="Predicted Sentiment Distribution",
-        hole=0.4
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-with col2:
-    fig = px.bar(
-        sentiment_counts,
-        x="Sentiment",
-        y="Count",
-        color="Sentiment",
-        title="Number of Reviews by Sentiment",
-        text="Count"
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-# --------------------------------------------------
-# RATING ANALYSIS
-# --------------------------------------------------
-
-st.divider()
-st.header("2. Customer Rating Analysis")
-
-rating_counts = (
-    filtered_df["Rating"]
-    .value_counts()
-    .sort_index()
-    .reset_index()
-)
-
-rating_counts.columns = ["Rating", "Count"]
 
 fig = px.bar(
-    rating_counts,
-    x="Rating",
-    y="Count",
-    title="Distribution of Customer Ratings",
-    text="Count",
-    color="Rating"
+    rating_data,
+    x="Brand",
+    y="Average_Rating",
+    color="Average_Rating",
+    hover_data=["Review_Count"],
+    range_y=[0, 5],
+    title="Average Customer Rating by Shopping App"
 )
-
 st.plotly_chart(fig, use_container_width=True)
 
-# --------------------------------------------------
-# ASPECT ANALYSIS
-# --------------------------------------------------
+# Sentiment comparison
+st.subheader("2. Sentiment Distribution by Brand")
 
-st.divider()
-st.header("3. Customer Experience Aspect Analysis")
-
-aspect_counts = (
-    filtered_df["Aspect"]
-    .value_counts()
-    .reset_index()
+sentiment_data = (
+    filtered.groupby(["Brand", "Predicted_Sentiment"])
+    .size()
+    .reset_index(name="Review_Count")
 )
-
-aspect_counts.columns = ["Aspect", "Review Count"]
 
 fig = px.bar(
-    aspect_counts,
-    x="Review Count",
-    y="Aspect",
-    orientation="h",
-    title="Reviews by Customer Experience Aspect",
-    text="Review Count"
-)
-
-st.plotly_chart(fig, use_container_width=True)
-
-aspect_sentiment = pd.crosstab(
-    filtered_df["Aspect"],
-    filtered_df["Predicted_Sentiment"]
-).reset_index()
-
-fig = px.bar(
-    aspect_sentiment,
-    x="Aspect",
-    y=["positive", "negative", "neutral"],
-    title="Sentiment Across Customer Experience Aspects",
-    barmode="group"
-)
-
-st.plotly_chart(fig, use_container_width=True)
-
-# --------------------------------------------------
-# SENTIMENT SCORE ANALYSIS
-# --------------------------------------------------
-
-st.divider()
-st.header("4. Sentiment Score Analysis")
-
-fig = px.histogram(
-    filtered_df,
-    x="Sentiment_Score",
+    sentiment_data,
+    x="Brand",
+    y="Review_Count",
     color="Predicted_Sentiment",
-    nbins=30,
-    title="Distribution of VADER Sentiment Scores"
+    barmode="stack",
+    title="Positive, Negative and Neutral Reviews"
 )
-
 st.plotly_chart(fig, use_container_width=True)
 
-# --------------------------------------------------
-# REVIEW EXPLORER
-# --------------------------------------------------
+# Aspect analysis
+st.subheader("3. Customer Experience Issues")
 
-st.divider()
-st.header("5. Customer Review Explorer")
-
-review_type = st.selectbox(
-    "Select Review Category",
-    ["All", "Negative", "Positive", "Neutral"]
+aspect_data = (
+    filtered.groupby(["Brand", "Aspect"])
+    .size()
+    .reset_index(name="Review_Count")
 )
 
-review_df = filtered_df.copy()
+fig = px.bar(
+    aspect_data,
+    x="Brand",
+    y="Review_Count",
+    color="Aspect",
+    barmode="stack",
+    title="Customer Experience Aspects Across Brands"
+)
+st.plotly_chart(fig, use_container_width=True)
 
-if review_type != "All":
-    review_df = review_df[
-        review_df["Predicted_Sentiment"] == review_type.lower()
+# Overall aspect distribution
+st.subheader("4. Overall Customer Complaint Categories")
+
+overall_aspects = (
+    filtered["Aspect"].value_counts()
+    .reset_index()
+)
+overall_aspects.columns = ["Aspect", "Review_Count"]
+
+fig = px.pie(
+    overall_aspects,
+    names="Aspect",
+    values="Review_Count",
+    title="Distribution of Customer Experience Aspects"
+)
+st.plotly_chart(fig, use_container_width=True)
+
+# Brand summary
+st.subheader("5. Brand Performance Summary")
+
+summary = (
+    filtered.groupby("Brand")
+    .agg(
+        Total_Reviews=("Review", "count"),
+        Average_Rating=("Rating", "mean"),
+        Positive_Reviews=(
+            "Predicted_Sentiment",
+            lambda x: (x == "positive").sum()
+        ),
+        Negative_Reviews=(
+            "Predicted_Sentiment",
+            lambda x: (x == "negative").sum()
+        )
+    )
+    .reset_index()
+)
+
+summary["Average_Rating"] = summary["Average_Rating"].round(2)
+summary["Positive_Percentage"] = (
+    summary["Positive_Reviews"] / summary["Total_Reviews"] * 100
+).round(1)
+
+st.dataframe(summary, use_container_width=True, hide_index=True)
+
+# Review explorer
+st.subheader("6. Customer Review Explorer")
+
+search = st.text_input("Search review keywords")
+
+reviews_view = filtered.copy()
+
+if search:
+    reviews_view = reviews_view[
+        reviews_view["Review"].str.contains(
+            search, case=False, na=False
+        )
     ]
-
-st.write(f"Showing {len(review_df):,} reviews")
 
 st.dataframe(
-    review_df[
-        [
-            "Review",
-            "Rating",
-            "Sentiment",
-            "Predicted_Sentiment",
-            "Aspect",
-            "Sentiment_Score"
-        ]
-    ].head(200),
+    reviews_view[
+        ["Brand", "Rating", "Predicted_Sentiment",
+         "Aspect", "Review", "Review_Date"]
+    ].sort_values("Review_Date", ascending=False),
     use_container_width=True,
     hide_index=True
 )
 
-# --------------------------------------------------
-# BUSINESS INSIGHTS
-# --------------------------------------------------
-
-st.divider()
-st.header("6. Business Insights")
-
-if len(filtered_df) > 0:
-
-    most_discussed = filtered_df["Aspect"].value_counts().idxmax()
-
-    negative_reviews = filtered_df[
-        filtered_df["Predicted_Sentiment"] == "negative"
-    ]
-
-    st.write(
-        f"- **Most discussed experience area:** {most_discussed}"
-    )
-
-    st.write(
-        f"- **Negative reviews:** {len(negative_reviews):,}"
-    )
-
-    if len(negative_reviews) > 0:
-        negative_aspect = negative_reviews["Aspect"].value_counts().idxmax()
-
-        st.write(
-            f"- **Most frequently mentioned aspect in negative reviews:** "
-            f"{negative_aspect}"
-        )
-
-    st.write(
-        f"- **Average customer rating:** {avg_rating:.2f} out of 5"
-    )
-
-else:
-    st.info("No reviews match the selected filters.")
-
-# --------------------------------------------------
-# PROJECT INFORMATION
-# --------------------------------------------------
-
-st.divider()
-
-st.subheader("About This Project")
-
-st.write(
-    """
-    This project uses customer review data from fast-fashion mobile
-    applications to study consumer perception and app experience.
-
-    **Technologies:** Python, Pandas, PySpark pipeline, VADER NLP,
-    Streamlit and Plotly.
-
-    **Data limitation:** The supplied dataset does not contain an
-    individual brand identifier. Therefore, this dashboard analyses
-    overall fast-fashion app experiences rather than comparing
-    individual brands.
-
-    **Methodology note:** Original sentiment labels are supplied by
-    the dataset. Predicted sentiment is independently calculated
-    using VADER. These two labels may differ.
-    """
+# Download
+st.download_button(
+    "Download Filtered Reviews CSV",
+    data=filtered.to_csv(index=False).encode("utf-8"),
+    file_name="brand_intelligence_results.csv",
+    mime="text/csv"
 )
 
-st.caption("AI-Based Brand Intelligence and Consumer Perception Analytics")
+st.divider()
+
+st.subheader("Methodology and Limitations")
+
+st.write("""
+- Public customer reviews were collected from 20 Google Play shopping apps.
+- PySpark was used for data cleaning and processing.
+- VADER was used for rule-based sentiment classification.
+- Keyword-based classification was used to identify customer experience aspects.
+- Ratings represent app-store ratings, not direct product-quality scores.
+- Review counts differ between apps, and the collected sample is not necessarily representative of all customers.
+- Sentiment and aspect labels are automated estimates and may contain classification errors.
+""")
+
+st.caption("Academic Big Data Analytics Project | Fashion Shopping App Intelligence")
