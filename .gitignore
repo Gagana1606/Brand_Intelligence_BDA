@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+.sparkStaging/
+spark-warehouse/
+data/spark_output/
+data/*.zip
